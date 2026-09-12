@@ -1,0 +1,48 @@
+.page {
+  max-width:36rem;
+  padding:var(--dp12) var(--dp5) var(--dp18);
+  margin:0 auto;
+}
+
+.page h1 {
+  margin:0 0 var(--dp5);
+  letter-spacing:-.03em;
+  font-size:clamp(2rem,5vw,2.75rem);
+  font-weight:700;
+  line-height:1.08;
+}
+
+.page h2 {
+  margin:var(--dp5) 0 var(--dp2);
+  letter-spacing:-.015em;
+  font-size:1.0625rem;
+  font-weight:700;
+}
+
+.page p,
+.page li {
+  color:var(--ink-soft);
+}
+
+.page p {
+  margin:0 0 var(--dp2);
+}
+
+.page ul {
+  margin:0 0 var(--dp2);
+  padding-left:var(--dp3);
+}
+
+.updated {
+  margin-top:var(--dp8);
+  opacity:.7;
+  font-size:.9375rem;
+}
+
+.back {
+  margin-bottom:var(--dp5);
+  color:var(--ink-soft);
+  font-size:.9375rem;
+  text-decoration:none;
+  display:inline-block;
+}

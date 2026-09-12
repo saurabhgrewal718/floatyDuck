@@ -1,0 +1,175 @@
+/* A screen, not a screenshot. Everything in here is generic OS chrome except her. */
+
+.screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--dp2);
+  border: 1px solid #dfe3e8;
+  /* A quiet desktop: cool enough to read as a display, pale enough to stay calm. */
+  background: linear-gradient(165deg, #eef1f5 0%, #e4e9ef 55%, #dde3ea 100%);
+  box-shadow: 0 1px 2px rgba(29, 29, 31, 0.04), 0 18px 40px -18px rgba(29, 29, 31, 0.18);
+}
+
+.menubar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 5.6%;
+  min-height: 20px;
+  padding: 0 12px;
+  /* Deliberately not backdrop-filter: this lives on a rotating element, so the
+     compositor would re-blur it every frame -- to blur a flat gradient nobody can
+     see through anyway. */
+  background: rgba(250, 251, 252, 0.86);
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(29, 29, 31, 0.78);
+}
+
+.menuApple {
+  width: 8px;
+  height: 9px;
+  border-radius: 50% 50% 45% 45%;
+  background: rgba(29, 29, 31, 0.72);
+}
+
+.menuItem {
+  letter-spacing: -0.005em;
+}
+
+.menuSpacer {
+  flex: 1;
+}
+
+.menuStatus {
+  width: 11px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(29, 29, 31, 0.28);
+}
+
+.menuClock {
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------------- a window ---- */
+
+.window {
+  position: absolute;
+  top: 16%;
+  left: 22%;
+  width: 58%;
+  height: 56%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  box-shadow: 0 20px 44px -16px rgba(29, 29, 31, 0.26);
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: #f6f6f7;
+  border-bottom: 1px solid rgba(29, 29, 31, 0.07);
+}
+
+.light {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.close { background: #ff5f57; }
+.min { background: #febc2e; }
+.zoom { background: #28c840; }
+
+.windowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 16px 14px;
+}
+
+.textLine {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(29, 29, 31, 0.1);
+}
+
+/* ------------------------------------------------------------- her, live ---- */
+
+.particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.duck {
+  position: absolute;
+  left: 2.6%;
+  bottom: 12.5%;
+  line-height: 0;
+}
+
+/* ---------------------------------------------------------------- a dock ---- */
+
+.dock {
+  position: absolute;
+  left: 50%;
+  bottom: 2.2%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  padding: 5px 7px;
+  border-radius: 11px;
+  background: rgba(252, 253, 254, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.dockTile {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(29, 29, 31, 0.14);
+}
+
+/* The only app in the dock anyone can name. */
+.dockDuck {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: var(--ink-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 640px) {
+  .window {
+    top: 15%;
+    left: 26%;
+    width: 66%;
+    height: 52%;
+  }
+
+  .dockTile,
+  .dockDuck {
+    width: 15px;
+    height: 15px;
+    border-radius: 4px;
+  }
+
+  .menubar {
+    gap: 9px;
+    font-size: 8px;
+  }
+}

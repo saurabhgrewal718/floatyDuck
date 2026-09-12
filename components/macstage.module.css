@@ -1,0 +1,260 @@
+/**
+ * A pinned stage. The track is tall; the Mac inside it holds still while the track
+ * scrolls past, and the three acts play inside its screen.
+ */
+
+.track {
+  position: relative;
+  height: 620vh;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: center;
+  justify-items: center;
+  gap: var(--dp3);
+  /* Clear the sticky header exactly, then a full gap below it. */
+  padding: calc(var(--header-h) + var(--dp8)) var(--dp5) var(--dp5);
+  overflow: hidden;
+}
+
+.macWrap {
+  position: relative;
+  width: 100%;
+  /* 16:10 means height = width / 1.6, so capping width by svh caps height too and
+     leaves room for the captions underneath on short viewports. */
+  max-width: min(1000px, 80svh);
+}
+
+.mac {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--dp2);
+  border: 1px solid #dfe3e8;
+  background: linear-gradient(165deg, #eef1f5 0%, #e4e9ef 55%, #dde3ea 100%);
+  box-shadow: 0 1px 2px rgba(29, 29, 31, 0.04), 0 30px 60px -24px rgba(29, 29, 31, 0.28);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  contain: layout paint;
+}
+
+.chrome,
+.chromeWindow {
+  position: absolute;
+  inset: 0;
+  will-change: opacity;
+}
+
+/* The droplets get a narrow strip, not the whole screen: a full-size canvas uploads
+   roughly four times the texture every frame for the same picture. */
+.drops {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Act 2. The reminder is that the screen goes away, so it really does. */
+.dark {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #05060a;
+  opacity: 0;
+  will-change: opacity;
+  pointer-events: none;
+}
+
+/* Sized to HER, moved by transform alone -- crossing the screen is compositor work
+   with no repaint. */
+.duck {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  transform-origin: 0 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* Act 3. */
+.badge {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  padding: 3px 9px;
+  border-radius: var(--dp);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.note {
+  position: absolute;
+  right: 2.4%;
+  top: 9%;
+  z-index: 7;
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: min(40%, 236px);
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: rgba(252, 253, 254, 0.94);
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  box-shadow: 0 12px 28px -10px rgba(29, 29, 31, 0.3);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.noteIcon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--ink-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.noteBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.noteBody strong {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------- captions ---- */
+
+.captions {
+  position: relative;
+  width: 100%;
+  max-width: 38rem;
+  min-height: 8.5rem;
+}
+
+.caption {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dp2);
+  text-align: center;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.capTitle {
+  margin: 0;
+  font-size: clamp(1.4rem, 2.6vw, 1.95rem);
+  line-height: 1.1;
+  letter-spacing: -0.026em;
+  font-weight: 700;
+}
+
+.capBody {
+  margin: 0;
+  max-width: 32rem;
+  color: var(--ink-soft);
+}
+
+.sound {
+  padding: 7px 15px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 140ms ease-out, transform 120ms ease-out;
+}
+
+.sound:hover {
+  background: var(--paper-sunk);
+}
+
+.sound:active {
+  transform: scale(0.975);
+}
+
+.sound:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ------------------------------------------------------------------ deck ---- */
+
+.deck {
+  position: relative;
+  left: -4%;
+  width: 108%;
+  aspect-ratio: 68 / 1;
+  border-radius: 0 0 9px 9px;
+  background: linear-gradient(180deg, #d9dde3 0%, #c6ccd4 58%, #aeb5be 100%);
+  clip-path: polygon(1.7% 0, 98.3% 0, 100% 100%, 0 100%);
+  box-shadow: 0 14px 26px -10px rgba(29, 29, 31, 0.3);
+}
+
+.notch {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 11%;
+  height: 42%;
+  border-radius: 0 0 4px 4px;
+  background: rgba(29, 29, 31, 0.13);
+}
+
+/* No pinning, no lid, no dancing, no dark takeover: the first act's last frame. */
+.stillTrack {
+  height: auto;
+}
+
+.stillTrack .stage {
+  position: static;
+  height: auto;
+  padding-block: var(--dp12);
+}
+
+@media (max-width: 640px) {
+  .captions {
+    min-height: 11rem;
+  }
+}

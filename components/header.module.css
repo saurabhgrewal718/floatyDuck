@@ -1,0 +1,107 @@
+.header {
+  min-height: var(--header-h);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* The divider is a consequence of scrolling, not a permanent line. */
+.header::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--hair);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.scrolled::after {
+  opacity: 1;
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dp3);
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: 14px var(--dp5);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--dp2);
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  /* Shared by the mail link and the sound button -- a <button> would otherwise
+     arrive with the UA's border, background and font. */
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius);
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
+}
+
+.icon:hover {
+  background: rgba(63, 40, 50, 0.06);
+  color: var(--ink);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 17px 9px 15px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.008em;
+  text-decoration: none;
+  transition: transform 120ms ease-out;
+}
+
+.pill:active {
+  transform: scale(0.975);
+}
+
+.icon:focus-visible,
+.pill:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* She is about eye strain: honour a request for less transparency. */
+@media (prefers-reduced-transparency: reduce) {
+  .header {
+    background: var(--paper);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .inner {
+    padding-inline: var(--dp3);
+  }
+
+  .pill {
+    display: none;
+  }
+}

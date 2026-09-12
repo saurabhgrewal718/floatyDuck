@@ -1,0 +1,62 @@
+.section {
+  max-width: var(--frame);
+  margin: 0 auto;
+  /* The stage below brings its own top padding. */
+  padding: var(--dp5) var(--dp5) var(--dp8);
+}
+
+.frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--dp2);
+  background: var(--paper-sunk);
+  border: 1px solid var(--hair);
+  box-shadow: 0 1px 2px rgba(29, 29, 31, 0.04), 0 26px 54px -26px rgba(29, 29, 31, 0.22);
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dp2);
+  height: 100%;
+  text-align: center;
+  padding: var(--dp5);
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: var(--ink-soft);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.placeholderText {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.placeholderHint {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  opacity: 0.7;
+}
+
+.placeholderHint code {
+  font-size: 0.875rem;
+}
