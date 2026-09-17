@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SUPPORT_EMAIL } from "@/lib/links";
 import Link from "next/link";
 import s from "../legal.module.css";
 
@@ -43,7 +44,7 @@ export default function Terms() {
 
       <h2>Getting in touch</h2>
       <p>
-        <a href="mailto:hello@floatyduck.com">hello@floatyduck.com</a>
+        <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
       </p>
 
       <p className={s.updated}>Last updated 10 September 2026.</p>

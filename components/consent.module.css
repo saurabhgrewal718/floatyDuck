@@ -1,0 +1,90 @@
+/* Sat on the paper rather than over it: the page is white and quiet, and a dark
+   slab across the bottom would be the loudest thing on it. */
+.bar {
+  position: fixed;
+  inset: auto var(--dp2) var(--dp2) auto;
+  z-index: 40;
+  max-width: 26rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dp2);
+  padding: var(--dp3);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(29, 29, 31, 0.1);
+}
+
+/* It arrives after the page has settled, so it reads as an aside rather than as a
+   gate someone has to get past to see the duck at all. */
+@media (prefers-reduced-motion: no-preference) {
+  .bar {
+    animation: rise 320ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--dp2));
+  }
+}
+
+.text {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.text a {
+  color: inherit;
+}
+
+.row {
+  display: flex;
+  gap: var(--dp);
+}
+
+.accept,
+.decline {
+  flex: 1;
+  padding: var(--dp) var(--dp2);
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.accept {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Given the same weight as Accept on purpose. A decline styled as a whisper next to
+   a solid button is the pattern the regulators named, and the page's whole argument
+   is that it is not doing anything to you behind your back. */
+.decline {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--hair);
+}
+
+.accept:hover {
+  opacity: 0.86;
+}
+
+.decline:hover {
+  background: var(--paper-sunk);
+}
+
+@media (max-width: 34rem) {
+  .bar {
+    inset: auto var(--dp) var(--dp) var(--dp);
+    max-width: none;
+  }
+}

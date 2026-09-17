@@ -20,7 +20,9 @@
  */
 
 import Image from "next/image";
+import type PlayerType from "@vimeo/player";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { track } from "@/lib/analytics";
 import { DuckMark } from "./Logo";
 import { VIDEO, VIDEO_POSTER } from "@/lib/links";
 import s from "./video.module.css";
@@ -149,11 +151,57 @@ function FilePlayer({ src, poster }: { src: string; poster?: string }) {
 
 function VimeoPlayer({ id, hash, poster }: { id: string; hash?: string; poster?: string }) {
   const [playing, setPlaying] = useState(false);
+  const frameRef = useRef<HTMLIFrameElement>(null);
+
+  /* HOW FAR PEOPLE ACTUALLY GET.
+     The frame is another origin and volunteers nothing, so without the player's SDK
+     talking to it over postMessage the click on the poster is the last thing this
+     page ever learns about the video -- plays would be the only number, and plays
+     say nothing about whether the thing is worth watching. The import sits inside
+     the effect so its weight is only paid by the people who asked to watch; nobody
+     else fetches a byte of it. */
+  useEffect(() => {
+    const frame = frameRef.current;
+    if (!playing || !frame) return;
+
+    let player: PlayerType | undefined;
+    let cancelled = false;
+
+    void (async () => {
+      const { default: Player } = await import("@vimeo/player");
+      if (cancelled) return;
+      player = new Player(frame);
+
+      /* Each mark counted once, and only forward. `timeupdate` runs several times a
+         second, so without the set a single viewer sends 25% a hundred times over;
+         and someone who drags the scrubber back would re-cross it and be counted as
+         a second person who was never there. */
+      const passed = new Set<number>();
+      player.on("timeupdate", ({ percent }: { percent: number }) => {
+        for (const mark of [25, 50, 75]) {
+          if (percent * 100 >= mark && !passed.has(mark)) {
+            passed.add(mark);
+            track("video_progress", { percent: mark });
+          }
+        }
+      });
+      player.on("ended", () => track("video_completed"));
+    })();
+
+    return () => {
+      cancelled = true;
+      /* Listeners only. `destroy()` would take the iframe with it, and that element
+         belongs to React. */
+      player?.off("timeupdate");
+      player?.off("ended");
+    };
+  }, [playing]);
 
   return (
     <div className={s.frame}>
       {playing ? (
         <iframe
+          ref={frameRef}
           className={s.iframe}
           src={embedSrc(id, hash)}
           title="Floaty Duck"
@@ -163,7 +211,14 @@ function VimeoPlayer({ id, hash, poster }: { id: string; hash?: string; poster?:
           referrerPolicy="strict-origin-when-cross-origin"
         />
       ) : (
-        <button type="button" className={s.facade} onClick={() => setPlaying(true)}>
+        <button
+          type="button"
+          className={s.facade}
+          onClick={() => {
+            track("video_played");
+            setPlaying(true);
+          }}
+        >
           {poster ? (
             /* Her own art, not a frame of the film: it is a square sprite with a
                transparent ground, so it is sat whole on the paper rather than cropped

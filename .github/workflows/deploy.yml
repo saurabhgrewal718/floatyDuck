@@ -27,7 +27,16 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      # .env.local is gitignored and the runner never has it, so the key is passed
+      # in here or production builds go out silently unmeasured. Repo secrets are
+      # not being used for secrecy -- NEXT_PUBLIC_* is inlined into the shipped
+      # JavaScript and a PostHog project key is meant to be public -- but so the
+      # key can be rotated without a commit.
       - run: npm run build
+        env:
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

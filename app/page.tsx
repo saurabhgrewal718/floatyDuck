@@ -4,20 +4,25 @@ import { VideoHolder } from "@/components/VideoHolder";
 import Link from "next/link";
 import { Floaty } from "@/components/Floaty";
 import { Reveal } from "@/components/Reveal";
-import { DOWNLOAD } from "@/lib/links";
+import { DownloadLink } from "@/components/DownloadLink";
+import { DOWNLOAD, SUPPORT_EMAIL } from "@/lib/links";
 import s from "./page.module.css";
 
 function Download({ quiet = false }: { quiet?: boolean }) {
   return (
     <div className={s.download}>
-      <a className={quiet ? s.buttonQuiet : s.button} href={DOWNLOAD}>
+      <DownloadLink
+        className={quiet ? s.buttonQuiet : s.button}
+        href={DOWNLOAD}
+        where={quiet ? "closing" : "hero"}
+      >
         Download for Mac
-      </a>
+      </DownloadLink>
       <p className={s.requirement}>
         Free. macOS 12 or later, on Apple Silicon and Intel.
       </p>
       <div className={s.onPhone}>
-        <p className={s.onPhoneLine}>Open floatyduck.com on your Mac to download her.</p>
+        <p className={s.onPhoneLine}>Open floatyduck.app on your Mac to download her.</p>
         <CopyLink className={s.copy} />
       </div>
     </div>
@@ -160,7 +165,7 @@ export default function Home() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/refunds">Refunds</Link>
-          <a href="mailto:hello@floatyduck.com">Support</a>
+          <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
         </nav>
       </footer>
     </>

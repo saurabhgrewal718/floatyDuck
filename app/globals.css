@@ -125,6 +125,22 @@ a {
   text-underline-offset: 3px;
 }
 
+/* A <button> because it acts on this page rather than going anywhere, dressed as a
+   link because it belongs mid-sentence in the privacy copy and a grey box there
+   would read as furniture rather than as the offer it is. */
+.linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--amber);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 /* ------------------------------------------------------------- floaty ---- */
 
 .floatyButton {
