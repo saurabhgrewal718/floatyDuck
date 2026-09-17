@@ -1,368 +1,398 @@
+/* Every gap here is a multiple of one duck pixel. See globals.css. */
+
+/* ----------------------------------------------------------------- hero ---- */
+
 .hero {
-  align-items:center;
-  gap:var(--dp8);
-  max-width:var(--frame);
-  padding:var(--dp8) var(--dp5) var(--dp12);
-  grid-template-columns:1.05fr .95fr;
-  min-height:74svh;
-  margin:0 auto;
-  display:grid;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: center;
+  gap: var(--dp8);
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: var(--dp8) var(--dp5) var(--dp12);
+  min-height: 74svh;
 }
 
 .heroText {
-  gap:var(--dp5);
-  flex-direction:column;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dp5);
 }
 
 .heroSub {
-  max-width:30rem;
+  max-width: 30rem;
 }
 
 .heroDuck {
-  flex-direction:column;
-  align-items:center;
-  gap:0;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
 }
 
 .pokeHint {
-  margin:calc(var(--dp5) * -1) 0 0;
-  letter-spacing:.004em;
-  color:var(--ink-soft);
-  opacity:.5;
-  font-size:.875rem;
+  margin: calc(var(--dp5) * -1) 0 0;
+  font-size: 0.875rem;
+  letter-spacing: 0.004em;
+  color: var(--ink-soft);
+  opacity: 0.5;
 }
 
+/* ------------------------------------------------------------- download ---- */
+
 .download {
-  align-items:flex-start;
-  gap:var(--dp2);
-  flex-direction:column;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--dp2);
 }
 
 .button,
 .buttonQuiet {
-  padding:calc(var(--dp2) - 2px) var(--dp3);
-  border-radius:var(--radius);
-  letter-spacing:-.01em;
-  font-size:1.0625rem;
-  font-weight:500;
-  text-decoration:none;
-  transition:transform .12s ease-out,background-color .12s ease-out;
-  display:inline-block;
+  display: inline-block;
+  padding: calc(var(--dp2) - 2px) var(--dp3);
+  border-radius: var(--radius);
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  transition: transform 120ms ease-out, background-color 120ms ease-out;
 }
 
 .button {
-  background:var(--ink);
-  color:var(--paper);
+  background: var(--ink);
+  color: var(--paper);
 }
 
 .buttonQuiet {
-  background:var(--amber);
-  color:var(--ink);
+  background: var(--amber);
+  color: var(--ink);
 }
 
+/* Feedback on the press, not on release. */
 .button:active,
 .buttonQuiet:active {
-  transform:scale(.975);
+  transform: scale(0.975);
 }
 
 .button:focus-visible,
 .buttonQuiet:focus-visible {
-  outline:2px solid var(--ink);
-  outline-offset:3px;
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 .requirement {
-  color:var(--ink-soft);
-  opacity:.72;
-  margin:0;
-  font-size:.9375rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  opacity: 0.72;
 }
 
 .onPhone {
-  align-items:flex-start;
-  gap:var(--dp2);
-  flex-direction:column;
-  display:none;
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--dp2);
 }
 
 .onPhoneLine {
-  color:var(--ink-soft);
-  margin:0;
-  font-size:1.0625rem;
+  margin: 0;
+  font-size: 1.0625rem;
+  color: var(--ink-soft);
 }
 
 .copy {
-  padding:calc(var(--dp2) - 2px) var(--dp3);
-  border-radius:var(--radius);
-  background:var(--ink);
-  color:var(--paper);
-  font:inherit;
-  letter-spacing:-.01em;
-  cursor:pointer;
-  border:0;
-  font-size:1.0625rem;
-  font-weight:500;
-  transition:transform .12s ease-out;
+  padding: calc(var(--dp2) - 2px) var(--dp3);
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
 }
 
 .copy:active {
-  transform:scale(.975);
+  transform: scale(0.975);
 }
 
 .copy:focus-visible {
-  outline:2px solid var(--ink);
-  outline-offset:3px;
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
+/* ---------------------------------------------------------------- proof ---- */
+
 .proof {
-  align-items:center;
-  gap:var(--dp8);
-  max-width:var(--frame);
-  padding:var(--dp12) var(--dp5);
-  grid-template-columns:.9fr 1.1fr;
-  margin:0 auto;
-  display:grid;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  align-items: center;
+  gap: var(--dp8);
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: var(--dp12) var(--dp5);
 }
 
 .proofText {
-  gap:var(--dp3);
-  flex-direction:column;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dp3);
 }
 
 .shotPlaceholder {
-  aspect-ratio:880/640;
-  border:1px dashed var(--hair);
-  border-radius:var(--dp2);
-  background:var(--paper-sunk);
-  color:var(--ink-soft);
-  opacity:.7;
-  place-items:center;
-  font-size:.9375rem;
-  display:grid;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 880 / 640;
+  border: 1px dashed var(--hair);
+  border-radius: var(--dp2);
+  background: var(--paper-sunk);
+  color: var(--ink-soft);
+  font-size: 0.9375rem;
+  opacity: 0.7;
 }
 
+/* ---------------------------------------------------------------- yours ---- */
+
 .yours {
-  max-width:var(--frame);
-  padding:var(--dp12) var(--dp5);
-  border-top:1px solid var(--hair);
-  margin:0 auto;
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: var(--dp12) var(--dp5);
+  border-top: 1px solid var(--hair);
 }
 
 .columns {
-  gap:var(--dp8);
-  margin-top:var(--dp5);
-  grid-template-columns:1fr 1fr;
-  display:grid;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dp8);
+  margin-top: var(--dp5);
 }
 
 .colName {
-  margin:0 0 var(--dp2);
-  letter-spacing:-.015em;
-  font-size:1.0625rem;
-  font-weight:700;
+  margin: 0 0 var(--dp2);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .list {
-  margin:0 0 var(--dp2);
-  color:var(--ink-soft);
-  padding:0;
-  list-style:none;
+  margin: 0 0 var(--dp2);
+  padding: 0;
+  list-style: none;
+  color: var(--ink-soft);
 }
 
 .list li {
-  padding:var(--dp) 0;
-  border-bottom:1px solid var(--hair);
+  padding: var(--dp) 0;
+  border-bottom: 1px solid var(--hair);
 }
 
+/* -------------------------------------------------------------- privacy ---- */
+
+/**
+ * Centred with flex, not with `margin-inline: auto` on the children.
+ *
+ * Auto margins lose here: .display, .path and .fine each declare their own `margin`
+ * shorthand at the same specificity, which resets the inline auto back to 0 -- so
+ * only .claims, which sets margin-top alone, ended up centred. Flex centring cannot
+ * be cancelled by a child's own margin, and the vertical rhythm moves to `gap` so
+ * there are no competing margins left to reason about.
+ */
 .privacy {
-  align-items:center;
-  gap:var(--dp5);
-  background:var(--paper-sunk);
-  padding:var(--dp18) var(--dp5);
-  text-align:center;
-  flex-direction:column;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dp5);
+  background: var(--paper-sunk);
+  padding: var(--dp18) var(--dp5);
+  text-align: center;
 }
 
-.privacy>* {
-  max-width:var(--frame);
+.privacy > * {
+  max-width: var(--frame);
 }
 
 .claims {
-  gap:var(--dp5);
-  width:100%;
-  margin:var(--dp3) 0 0;
-  text-align:left;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  display:grid;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--dp5);
+  width: 100%;
+  margin: var(--dp3) 0 0;
+  text-align: left;
 }
 
 .claim {
-  padding-top:var(--dp2);
-  border-top:1px solid #1d1d1f1f;
-  flex-direction:column;
-  gap:6px;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: var(--dp2);
+  border-top: 1px solid rgba(29, 29, 31, 0.12);
 }
 
 .claimName {
-  letter-spacing:-.015em;
-  color:var(--ink);
-  margin:0;
-  font-size:1.0625rem;
-  font-weight:700;
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--ink);
 }
 
 .claim p {
-  color:var(--ink-soft);
-  margin:0;
-  font-size:.9375rem;
-  line-height:1.5;
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
 }
-
-@media (max-width:760px) {
-  .claims {
-    gap:var(--dp3);
-    grid-template-columns:1fr;
+@media (max-width: 760px) {
+.claims {
+    grid-template-columns: 1fr;
+    gap: var(--dp3);
   }
 }
 
 .path {
-  color:var(--ink-soft);
-  overflow-wrap:anywhere;
-  margin:0;
-  font-size:.9375rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
 }
 
+/* :global(.fine) wrapped below -- CSS Modules hashes every class it sees, so a bare
+   `.fine` here compiles to a hash that never matches the global class. */
 .privacy :global(.fine) {
-  max-width:32rem;
-  margin:0;
+  max-width: 32rem;
+  margin: 0;
 }
+
+/* ------------------------------------------------------------------ cta ---- */
 
 .cta {
-  align-items:center;
-  gap:var(--dp5);
-  max-width:var(--frame);
-  padding:var(--dp18) var(--dp5);
-  text-align:center;
-  flex-direction:column;
-  margin:0 auto;
-  display:flex;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dp5);
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: var(--dp18) var(--dp5);
+  text-align: center;
 }
 
 .cta .download {
-  align-items:center;
+  align-items: center;
 }
 
+/* --------------------------------------------------------------- footer ---- */
+
 .footer {
-  padding:0 var(--dp5) var(--dp8);
-  text-align:center;
+  padding: 0 var(--dp5) var(--dp8);
+  text-align: center;
 }
 
 .ticks {
-  justify-content:center;
-  align-items:flex-end;
-  gap:var(--dp2);
-  height:var(--dp3);
-  display:flex;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: var(--dp2);
+  height: var(--dp3);
 }
 
 .tick {
-  background:var(--ink-soft);
-  opacity:.16;
-  width:2px;
-  height:10px;
+  width: 2px;
+  height: 10px;
+  background: var(--ink-soft);
+  opacity: 0.16;
 }
 
 .tick:nth-child(9),
 .tick:nth-child(10) {
-  height:var(--dp3);
-  background:var(--amber);
-  opacity:1;
+  height: var(--dp3);
+  background: var(--amber);
+  opacity: 1;
 }
 
 .wordmark {
-  margin:var(--dp3) 0 var(--dp5);
-  letter-spacing:-.05em;
-  font-size:clamp(3rem,13vw,9rem);
-  font-weight:700;
-  line-height:1;
+  margin: var(--dp3) 0 var(--dp5);
+  font-size: clamp(3rem, 13vw, 9rem);
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: -0.05em;
 }
 
 .footerNav {
-  justify-content:center;
-  gap:var(--dp5);
-  font-size:.9375rem;
-  display:flex;
+  display: flex;
+  justify-content: center;
+  gap: var(--dp5);
+  font-size: 0.9375rem;
 }
 
 .footerNav a {
-  color:var(--ink-soft);
-  text-decoration:none;
+  color: var(--ink-soft);
+  text-decoration: none;
 }
 
 .footerNav a:hover {
-  text-underline-offset:3px;
-  text-decoration:underline;
-  text-decoration-thickness:2px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
-@media (max-width:900px) {
+/* ----------------------------------------------------------- responsive ---- */
+
+@media (max-width: 900px) {
   .hero,
   .feature,
   .proof {
-    gap:var(--dp5);
-    grid-template-columns:1fr;
-    min-height:0;
+    grid-template-columns: 1fr;
+    gap: var(--dp5);
+    min-height: 0;
   }
 
   .hero {
-    padding-top:var(--dp8);
-    text-align:left;
+    padding-top: var(--dp8);
+    text-align: left;
   }
 
   .heroDuck {
-    order:-1;
-    align-items:flex-start;
+    order: -1;
+    align-items: flex-start;
   }
 
   .featureFlip .featureText {
-    order:0;
+    order: 0;
   }
 
   .featureArt {
-    justify-content:flex-start;
+    justify-content: flex-start;
   }
 
-  .triad,
+  .triad {
+    grid-template-columns: 1fr;
+    gap: var(--dp5);
+  }
+
   .columns {
-    gap:var(--dp5);
-    grid-template-columns:1fr;
+    grid-template-columns: 1fr;
+    gap: var(--dp5);
   }
 }
-
-@media (max-width:560px) {
-  .button,
+@media (max-width: 560px) {
+.button,
   .buttonQuiet,
   .requirement,
   .pokeHint {
-    display:none;
+    display: none;
   }
-
-  .path {
-    font-size:.875rem;
+.path {
+    font-size: 0.875rem;
   }
-
-  .onPhone {
-    display:flex;
+.onPhone {
+    display: flex;
   }
-
-  .privacy,
+.privacy,
   .cta {
-    padding-block:var(--dp12);
+    padding-block: var(--dp12);
   }
 }
+

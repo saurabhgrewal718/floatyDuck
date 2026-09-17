@@ -26,7 +26,7 @@ export default function Privacy() {
 
       <h2>This website</h2>
       <p>
-        floatyduck.app counts anonymous page views using Vercel Analytics, so we can tell
+        floatyduck.com counts anonymous page views using Vercel Analytics, so we can tell
         whether the page is working. It sets no cookies, it does not follow you to other
         sites, and it does not build a profile of you.
       </p>
@@ -37,7 +37,7 @@ export default function Privacy() {
 
       <h2>Getting in touch</h2>
       <p>
-        Questions to <a href="mailto:hello@floatyduck.app">hello@floatyduck.app</a>.
+        Questions to <a href="mailto:hello@floatyduck.com">hello@floatyduck.com</a>.
       </p>
 
       <p className={s.updated}>Last updated 10 September 2026.</p>

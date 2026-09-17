@@ -20,6 +20,124 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* The whole frame is the pause button; there is no other control on it. */
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------ the embed ---- */
+
+.iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/**
+ * The resting state of a Vimeo clip: her poster, and one button. Vimeo's player is
+ * not built until this is pressed, so what sits here before the press is ours.
+ */
+.facade {
+  position: relative;
+  /* Centres the fallback mark; the poster is a layer of its own, below. */
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--paper-sunk);
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.poster {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Contain, not cover: she is a square sprite on a transparent ground, and cover
+     would crop a 16/9 strip out of her middle. */
+  object-fit: contain;
+  /* Room for the button underneath her, and air at the top so she is not wedged in. */
+  padding: var(--dp3) var(--dp3) var(--dp8);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.play {
+  position: absolute;
+  left: 50%;
+  bottom: var(--dp3);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dp);
+  padding: 10px var(--dp2) 10px var(--dp2);
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  box-shadow: 0 1px 2px rgba(29, 29, 31, 0.05), 0 8px 20px -10px rgba(29, 29, 31, 0.3);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  /* Two lines would make the pill tall enough to sit on top of her. */
+  white-space: nowrap;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
+}
+
+/* A 16/9 frame on a phone is only ~170px tall, and the desktop spacing spends most
+   of that on air. Both she and the button give some back. */
+@media (max-width: 600px) {
+  .poster {
+    padding: var(--dp2) var(--dp2) var(--dp5);
+  }
+
+  .play {
+    bottom: var(--dp);
+    padding: 8px 14px;
+    font-size: 0.875rem;
+  }
+}
+
+.play svg {
+  fill: var(--beak);
+  /* Optical centring: a triangle looks left-heavy sat on its true centre. */
+  margin-left: 1px;
+}
+
+.facade:hover .play {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 1px 2px rgba(29, 29, 31, 0.05), 0 14px 26px -12px rgba(29, 29, 31, 0.36);
+}
+
+.facade:hover .poster {
+  transform: translateY(-3px);
+}
+
+.facade:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poster,
+  .play,
+  .facade:hover .poster,
+  .facade:hover .play {
+    transition: none;
+    transform: translateX(0);
+  }
+
+  .play,
+  .facade:hover .play {
+    transform: translateX(-50%);
+  }
 }
 
 .placeholder {

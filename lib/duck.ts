@@ -1,9 +1,10 @@
 /**
- * Floaty, ported from the app's tools/gen-duck.mjs.
+ * Floaty's pixel art, ported from the app's tools/gen-duck.mjs.
  *
- * The app rasterises this same 18x18 art grid to a PNG at build time. The website
- * draws it live instead, so one grid is the source of truth for both -- change the
- * art in the app and this file is the only thing here that needs to follow.
+ * NOTHING RENDERS THIS ANY MORE. The site draws her from /floatyDuck.png instead, and
+ * this file is kept only because app/globals.css takes its whole palette from the
+ * seven colours below, and because the app still ships the grid. Delete it and update
+ * that stylesheet's comment together, or not at all.
  *
  * THE SEVEN COLOURS BELOW ARE ALSO THE PAGE'S PALETTE. That is deliberate: the site
  * has no colours of its own, it borrows hers. See app/globals.css.

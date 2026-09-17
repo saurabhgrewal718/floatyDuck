@@ -21,7 +21,7 @@ export function MacChrome({ only }: { only?: "furniture" | "window" }) {
     <>
       {wants("furniture") && (
         <div className={s.menubar}>
-          <span className={s.menuApple} aria-hidden="true" />
+          <span className={s.menuLogo} aria-hidden="true" />
           <span className={s.menuItem}>Finder</span>
           <span className={s.menuItem}>File</span>
           <span className={s.menuItem}>Edit</span>

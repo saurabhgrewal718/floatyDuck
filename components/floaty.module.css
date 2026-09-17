@@ -1,0 +1,40 @@
+/* The three layers of the hero duck, stacked in one square. */
+
+.stage {
+  position: relative;
+  display: block;
+  /* Nothing here is clipped: the bob and the squash carry her past the box, which is
+     exactly what the old canvas needed its transparent margin for. */
+  will-change: transform;
+}
+
+.layer {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* The eye rides above the head, at the same size and origin, so the two line up with
+   no offsets to keep in sync. Both transforms are short enough to read as reflex. */
+.gaze,
+.lid {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.gaze {
+  transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lid {
+  transition: transform 70ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gaze,
+  .lid {
+    transition: none;
+  }
+}

@@ -7,8 +7,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { AppleMark } from "./AppleMark";
-import { Logo } from "./Logo";
+import { DuckMark, Logo } from "./Logo";
 import { SoundToggle } from "./SoundToggle";
 import { DOWNLOAD, SUPPORT_EMAIL } from "@/lib/links";
 import s from "./header.module.css";
@@ -45,7 +44,7 @@ export function Header() {
             </svg>
           </a>
           <a className={s.pill} href={DOWNLOAD}>
-            <AppleMark size={15} />
+            <DuckMark size={17} eager />
             <span>Download</span>
           </a>
         </div>

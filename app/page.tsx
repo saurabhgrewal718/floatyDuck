@@ -17,7 +17,7 @@ function Download({ quiet = false }: { quiet?: boolean }) {
         Free. macOS 12 or later, on Apple Silicon and Intel.
       </p>
       <div className={s.onPhone}>
-        <p className={s.onPhoneLine}>Open floatyduck.app on your Mac to download her.</p>
+        <p className={s.onPhoneLine}>Open floatyduck.com on your Mac to download her.</p>
         <CopyLink className={s.copy} />
       </div>
     </div>
@@ -44,13 +44,13 @@ export default function Home() {
             <Download />
           </div>
           <div className={s.heroDuck}>
-            <Floaty dp={18} />
+            <Floaty size={396} />
             <p className={s.pokeHint}>Go on, poke her.</p>
           </div>
         </section>
 
         {/* ------------------------------------------------------ video ---- */}
-        {/* TODO: pass src="/floaty.mp4" (and a poster) once the file is in /public. */}
+        {/* Source lives in VIDEO, in lib/links.ts. */}
         <VideoHolder />
 
         {/* ------------------------------------- three acts, one screen ---- */}
@@ -160,7 +160,7 @@ export default function Home() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/refunds">Refunds</Link>
-          <a href="mailto:hello@floatyduck.app">Support</a>
+          <a href="mailto:hello@floatyduck.com">Support</a>
         </nav>
       </footer>
     </>

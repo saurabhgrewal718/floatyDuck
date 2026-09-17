@@ -7,7 +7,7 @@ export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 /** Progress through the window [a, b] of an overall 0..1 timeline. */
 export const phase = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
 
-/** Smooth in and out. Apple's device pages never start or stop abruptly. */
+/** Smooth in and out. A good product page never starts or stops abruptly. */
 export const smooth = (t: number) => t * t * (3 - 2 * t);
 
 /** Fast out, slow in -- for things arriving. */

@@ -1,48 +1,48 @@
 .page {
-  max-width:36rem;
-  padding:var(--dp12) var(--dp5) var(--dp18);
-  margin:0 auto;
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: var(--dp12) var(--dp5) var(--dp18);
 }
 
 .page h1 {
-  margin:0 0 var(--dp5);
-  letter-spacing:-.03em;
-  font-size:clamp(2rem,5vw,2.75rem);
-  font-weight:700;
-  line-height:1.08;
+  margin: 0 0 var(--dp5);
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 .page h2 {
-  margin:var(--dp5) 0 var(--dp2);
-  letter-spacing:-.015em;
-  font-size:1.0625rem;
-  font-weight:700;
+  margin: var(--dp5) 0 var(--dp2);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
 }
 
 .page p,
 .page li {
-  color:var(--ink-soft);
+  color: var(--ink-soft);
 }
 
 .page p {
-  margin:0 0 var(--dp2);
+  margin: 0 0 var(--dp2);
 }
 
 .page ul {
-  margin:0 0 var(--dp2);
-  padding-left:var(--dp3);
+  margin: 0 0 var(--dp2);
+  padding-left: var(--dp3);
 }
 
 .updated {
-  margin-top:var(--dp8);
-  opacity:.7;
-  font-size:.9375rem;
+  margin-top: var(--dp8);
+  font-size: 0.9375rem;
+  opacity: 0.7;
 }
 
 .back {
-  margin-bottom:var(--dp5);
-  color:var(--ink-soft);
-  font-size:.9375rem;
-  text-decoration:none;
-  display:inline-block;
+  display: inline-block;
+  margin-bottom: var(--dp5);
+  font-size: 0.9375rem;
+  color: var(--ink-soft);
+  text-decoration: none;
 }

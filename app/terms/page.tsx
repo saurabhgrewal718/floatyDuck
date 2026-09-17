@@ -43,7 +43,7 @@ export default function Terms() {
 
       <h2>Getting in touch</h2>
       <p>
-        <a href="mailto:hello@floatyduck.app">hello@floatyduck.app</a>
+        <a href="mailto:hello@floatyduck.com">hello@floatyduck.com</a>
       </p>
 
       <p className={s.updated}>Last updated 10 September 2026.</p>

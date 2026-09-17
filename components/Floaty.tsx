@@ -1,65 +1,43 @@
 "use client";
 
 /**
- * Two ways to put Floaty on the page.
+ * Floaty on the hero: she bobs, blinks, follows the pointer and squashes when poked.
  *
- * <Floaty> is the hero: she bobs, blinks, follows the pointer and squashes when poked.
- * She draws from lib/duck.ts, so she cannot drift from the app's art.
+ * She is the app icon in three layers rather than one flat image, because the eye has
+ * to move independently of the head:
  *
- * Only `transform` and `opacity` are ever animated -- the canvas itself is redrawn just
- * when a pixel actually changes (a blink, a gaze shift), never per frame.
+ *   floatyDuck-body.png   the icon with the eye painted out
+ *   floatyDuck-eye.png    the eye alone, matted against that same background
+ *
+ * Stacked at rest the two are the original artwork again, to within a rounding error.
+ * Both layers are the full 499x500 frame, so they need no positioning of their own --
+ * `inset: 0` lines them up, and the only numbers here are where a blink pivots and how
+ * far a glance carries the eye.
+ *
+ * Only `transform` and `opacity` are ever animated, so nothing here touches layout.
  */
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { DuckState, FIELD, duckPixels } from "@/lib/duck";
+import s from "./floaty.module.css";
 
 /**
- * The largest whole number of screen pixels per art pixel that still fits the
- * container, never above `maxDp`.
+ * Where a blink pivots, in frame coordinates.
  *
- * Whole numbers only: pixel art at a fractional scale gets uneven pixel widths,
- * which is exactly the blur the app's README goes out of its way to avoid.
+ * Not the eye's centre (that is 20.8%) but a little below it: a lid comes down over
+ * the eye rather than closing on it from both sides, so the slit it leaves sits in
+ * the lower third of where the eye was.
  */
-function useFitDp(maxDp: number, hostRef: React.RefObject<HTMLElement | null>) {
-  const [dp, setDp] = useState(maxDp);
+const EYE_ORIGIN = "59.42% 22.3%";
 
-  useEffect(() => {
-    const el = hostRef.current;
-    const parent = el?.parentElement ?? el;
-    if (!parent) return;
-
-    const measure = () => {
-      const w = parent.clientWidth || window.innerWidth;
-      setDp(Math.max(4, Math.min(maxDp, Math.floor(w / FIELD))));
-    };
-    measure();
-
-    const ro = new ResizeObserver(measure);
-    ro.observe(parent);
-    return () => ro.disconnect();
-  }, [maxDp, hostRef]);
-
-  return dp;
-}
-
-function paint(canvas: HTMLCanvasElement, pixels: { x: number; y: number; c: string }[], dp: number) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
-  const side = FIELD * dp;
-  canvas.width = side * dpr;
-  canvas.height = side * dpr;
-  canvas.style.width = `${side}px`;
-  canvas.style.height = `${side}px`;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.imageSmoothingEnabled = false;
-  ctx.clearRect(0, 0, side, side);
-  for (const p of pixels) {
-    ctx.fillStyle = p.c;
-    ctx.fillRect(p.x * dp, p.y * dp, dp, dp);
-  }
-}
+/**
+ * How far a glance carries the eye, as a percentage of the frame.
+ *
+ * Her whole eye is 8.8% of the frame wide, so these are about a quarter of its width
+ * and a sixth of its height -- plainly a look, and still short of the googly.
+ */
+const GAZE_X = 2.2;
+const GAZE_Y = 2.0;
 
 function prefersReducedMotion() {
   return (
@@ -68,49 +46,74 @@ function prefersReducedMotion() {
   );
 }
 
-/* ------------------------------------------------------------------ hero ---- */
-
-export function Floaty({
-  dp: maxDp = 14,
-  label = "Floaty. Poke her.",
-}: {
-  dp?: number;
-  label?: string;
-}) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const stateRef = useRef<DuckState>({ gazeX: 0, gazeY: 0, expression: "idle" });
-  const dp = useFitDp(maxDp, buttonRef);
+/**
+ * The largest square that still fits the container, never above `size`.
+ *
+ * Measured rather than left to CSS because the bob and the squash are in pixels: a
+ * spring tuned for a 396px duck reads as a twitch on a 220px one.
+ */
+function useFitSize(size: number, hostRef: React.RefObject<HTMLElement | null>) {
+  const [side, setSide] = useState(size);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const el = hostRef.current;
+    const parent = el?.parentElement ?? el;
+    if (!parent) return;
+
+    const measure = () => {
+      const w = parent.clientWidth || window.innerWidth;
+      setSide(Math.max(120, Math.min(size, Math.floor(w))));
+    };
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [size, hostRef]);
+
+  return side;
+}
+
+export function Floaty({
+  size = 396,
+  label = "Floaty. Poke her.",
+}: {
+  size?: number;
+  label?: string;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const stageRef = useRef<HTMLSpanElement>(null);
+  const gazeRef = useRef<HTMLSpanElement>(null);
+  const lidRef = useRef<HTMLSpanElement>(null);
+  const side = useFitSize(size, buttonRef);
+
+  useEffect(() => {
     const button = buttonRef.current;
-    if (!canvas || !button) return;
+    const stage = stageRef.current;
+    const gaze = gazeRef.current;
+    const lid = lidRef.current;
+    if (!button || !stage || !gaze || !lid) return;
 
-    const still = prefersReducedMotion();
-    let raf = 0;
-    let disposed = false;
-
-    const redraw = () => paint(canvas, duckPixels(stateRef.current), dp);
-    redraw();
-
-    /* Reduced motion: she is simply there. No bob, no blink, no spring --
-       the poke still answers, as a 120ms opacity dip, so the page is not inert. */
-    if (still) {
+    /* Reduced motion: she is simply there. No bob, no blink, no gaze -- the poke still
+       answers, as a 120ms opacity dip, so the page is not inert. */
+    if (prefersReducedMotion()) {
       const dip = () => {
-        canvas.style.transition = "opacity 120ms ease-out";
-        canvas.style.opacity = "0.65";
-        window.setTimeout(() => (canvas.style.opacity = "1"), 120);
+        stage.style.transition = "opacity 120ms ease-out";
+        stage.style.opacity = "0.65";
+        window.setTimeout(() => (stage.style.opacity = "1"), 120);
       };
       button.addEventListener("pointerdown", dip);
       return () => button.removeEventListener("pointerdown", dip);
     }
 
+    let raf = 0;
+    let disposed = false;
+
     /* --- the squash spring. Critically underdamped, because a poke is physical. --- */
     const ZETA = 0.62;
     const RESPONSE = 0.32;
     const W = (2 * Math.PI) / RESPONSE;
-    let s = 0; // 0 = at rest, negative = squashed
+    let sp = 0; // 0 = at rest, negative = squashed
     let v = 0;
 
     let last = performance.now();
@@ -121,35 +124,34 @@ export function Floaty({
       const dt = Math.min((now - last) / 1000, 1 / 30);
       last = now;
 
-      // Spring integrates from its own live value, so an interrupting poke
-      // never jumps -- it just re-targets from wherever she currently is.
-      if (Math.abs(s) > 0.0005 || Math.abs(v) > 0.0005) {
-        const a = -W * W * s - 2 * ZETA * W * v;
+      // Spring integrates from its own live value, so an interrupting poke never
+      // jumps -- it just re-targets from wherever she currently is.
+      if (Math.abs(sp) > 0.0005 || Math.abs(v) > 0.0005) {
+        const a = -W * W * sp - 2 * ZETA * W * v;
         v += a * dt;
-        s += v * dt;
+        sp += v * dt;
       } else {
-        s = 0;
+        sp = 0;
         v = 0;
       }
 
-      const bob = -Math.sin(((now - start) / 2400) * Math.PI * 2) * 0.75 * dp;
-      const sy = 1 + s;
-      const sx = 1 - s * 0.55;
-      canvas.style.transform = `translate3d(0, ${bob.toFixed(2)}px, 0) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
+      const bob = -Math.sin(((now - start) / 2400) * Math.PI * 2) * (0.75 / 22) * side;
+      const sy = 1 + sp;
+      const sx = 1 - sp * 0.55;
+      stage.style.transform = `translate3d(0, ${bob.toFixed(2)}px, 0) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})`;
 
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
 
-    /* --- blink: 110ms, every 4-7s --- */
+    /* --- blink: 110ms, every 4-7s. The lid is the eye layer squeezed to a slit
+           about EYE_ORIGIN, which is what a closing eyelid leaves behind. --- */
     let blinkTimer = 0;
     const scheduleBlink = () => {
       blinkTimer = window.setTimeout(() => {
-        stateRef.current = { ...stateRef.current, expression: "blink" };
-        redraw();
+        lid.style.transform = "scaleY(0.08)";
         window.setTimeout(() => {
-          stateRef.current = { ...stateRef.current, expression: "idle" };
-          redraw();
+          lid.style.transform = "scaleY(1)";
           scheduleBlink();
         }, 110);
       }, 4000 + Math.random() * 3000);
@@ -159,32 +161,31 @@ export function Floaty({
     /* --- gaze. She faces right, so she can look ahead or right, level or down. --- */
     let pointerSeen = false;
     let wander = 0;
+    let gx: 0 | 1 = 0;
+    let gy: 0 | 1 = 0;
 
-    const setGaze = (gazeX: 0 | 1, gazeY: 0 | 1) => {
-      const cur = stateRef.current;
-      if (cur.gazeX === gazeX && cur.gazeY === gazeY) return;
-      stateRef.current = { ...cur, gazeX, gazeY };
-      if (cur.expression === "idle") redraw();
+    const setGaze = (nx: 0 | 1, ny: 0 | 1) => {
+      if (nx === gx && ny === gy) return;
+      gx = nx;
+      gy = ny;
+      gaze.style.transform = `translate(${gx * GAZE_X}%, ${gy * GAZE_Y}%)`;
     };
 
     const onPointerMove = (e: PointerEvent) => {
       if (e.pointerType === "touch") return;
       pointerSeen = true;
-      const r = canvas.getBoundingClientRect();
-      const cx = r.left + r.width * 0.52; // her eye sits right of centre
-      const cy = r.top + r.height * 0.42;
+      const r = stage.getBoundingClientRect();
+      const cx = r.left + r.width * 0.594; // her eye sits right of centre
+      const cy = r.top + r.height * 0.208;
       setGaze(e.clientX - cx > r.width * 0.06 ? 1 : 0, e.clientY - cy > r.height * 0.1 ? 1 : 0);
     };
     window.addEventListener("pointermove", onPointerMove, { passive: true });
 
     /* No pointer (a phone), so she looks around on her own. */
-    const startWander = () => {
-      wander = window.setInterval(() => {
-        if (pointerSeen) return;
-        setGaze(Math.random() < 0.5 ? 0 : 1, Math.random() < 0.7 ? 0 : 1);
-      }, 2200);
-    };
-    startWander();
+    wander = window.setInterval(() => {
+      if (pointerSeen) return;
+      setGaze(Math.random() < 0.5 ? 0 : 1, Math.random() < 0.7 ? 0 : 1);
+    }, 2200);
 
     /* --- the poke. On pointerdown, never on click: waiting for release feels dead. --- */
     const poke = () => {
@@ -205,11 +206,36 @@ export function Floaty({
       button.removeEventListener("pointerdown", poke);
       button.removeEventListener("keydown", onKey);
     };
-  }, [dp]);
+  }, [side]);
 
   return (
     <button ref={buttonRef} className="floatyButton" aria-label={label} type="button">
-      <canvas ref={canvasRef} style={{ transformOrigin: "50% 88%", display: "block" }} />
+      <span
+        ref={stageRef}
+        className={s.stage}
+        style={{ width: side, height: side, transformOrigin: "50% 88%" }}
+      >
+        <Image
+          className={s.layer}
+          src="/floatyDuck-body.png"
+          alt=""
+          width={side}
+          height={side}
+          priority
+        />
+        <span ref={gazeRef} className={s.gaze}>
+          <span ref={lidRef} className={s.lid} style={{ transformOrigin: EYE_ORIGIN }}>
+            <Image
+              className={s.layer}
+              src="/floatyDuck-eye.png"
+              alt=""
+              width={side}
+              height={side}
+              priority
+            />
+          </span>
+        </span>
+      </span>
     </button>
   );
 }

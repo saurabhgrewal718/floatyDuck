@@ -17,7 +17,7 @@ export default function Refunds() {
 
       <h2>If you buy the unlock and change your mind</h2>
       <p>
-        Email <a href="mailto:hello@floatyduck.app">hello@floatyduck.app</a> within 14
+        Email <a href="mailto:hello@floatyduck.com">hello@floatyduck.com</a> within 14
         days of buying and you get your money back. You do not need to give a reason.
       </p>
 

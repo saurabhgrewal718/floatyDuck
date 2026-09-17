@@ -13,27 +13,26 @@
  *   ACT 2  0.54 - 0.74   EYE REST   the screen goes dark and she dances
  *   ACT 3  0.78 - 1.00   TIMER      a countdown over her head, then a notification
  *
- * SMOOTHNESS IS AN ARCHITECTURE PROBLEM HERE, NOT A DRAW-CALL ONE. Measured: drawing
- * her 200 art pixels plus the droplets costs 0.04ms a frame, nothing against a 120Hz
- * budget of 8.33ms. What costs is compositing, so:
+ * SMOOTHNESS IS AN ARCHITECTURE PROBLEM HERE, NOT A DRAW-CALL ONE. What costs is
+ * compositing, so:
  *
- * - Her canvas is sized to HER and moves by `transform` only, so crossing the screen
- *   is compositor work with no repaint and no texture upload. It is redrawn solely
- *   when her whole-pixel scale changes.
+ * - She is one <img> in a box fixed at the biggest she ever gets, and every size she
+ *   takes in the scene is a `scale()` down from it. Her box is laid out once per
+ *   resize; crossing the screen and growing are compositor work with no repaint.
  * - The droplets get a narrow strip, not a full-screen canvas.
  * - Styles are written only when their value actually changes.
  * - Nothing inside the screen uses `backdrop-filter`: it sits on a rotating element,
  *   so the compositor would re-blur it every frame.
  *
- * Her scale SNAPS to whole pixels and she is never rotated or fractionally scaled --
- * pixel art at a fractional transform gets uneven pixel widths. The dance is built
- * from translation and exact horizontal flips instead, which stay pixel-perfect.
+ * She is never rotated -- she turns by an exact horizontal flip, which on `.duck`'s
+ * `transform-origin: 0 0` means anchoring to the right edge of her box instead of the
+ * left. That is the `cx + half` in the flipped branch.
  */
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { MacChrome } from "./MacChrome";
 import { DuckMark } from "./Logo";
-import { ART_GRID, duckRects } from "@/lib/duck";
 import { getStageSound, type Act } from "@/lib/stageSound";
 import { clamp, lerp, outCubic, phase, smooth } from "@/lib/ease";
 import s from "./macstage.module.css";
@@ -54,8 +53,16 @@ interface Sweat {
   life: number;
 }
 
-const RECTS = duckRects();
 const STRIP = 0.26;
+
+/**
+ * The three sizes she plays at, as fractions of the screen's height: arriving, parked
+ * in her corner, and dancing in the dark. BIG is also the size her element is built
+ * at, so every scale in the scene is a shrink and she is never blown up past her art.
+ */
+const BIG = 0.44;
+const SMALL = 0.07;
+const DANCE = 0.3;
 
 const mmss = (total: number) => {
   const m = Math.floor(total / 60);
@@ -66,7 +73,7 @@ const mmss = (total: number) => {
 export function MacStage() {
   const trackRef = useRef<HTMLDivElement>(null);
   const macRef = useRef<HTMLDivElement>(null);
-  const duckRef = useRef<HTMLCanvasElement>(null);
+  const duckRef = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLCanvasElement>(null);
   const chromeRef = useRef<HTMLDivElement>(null);
   const windowRef = useRef<HTMLDivElement>(null);
@@ -87,9 +94,8 @@ export function MacStage() {
     const note = noteRef.current;
     if (!track || !mac || !duck || !dropC || !chrome || !win || !dark || !badge || !note) return;
 
-    const dctx = duck.getContext("2d");
     const pctx = dropC.getContext("2d");
-    if (!dctx || !pctx) return;
+    if (!pctx) return;
 
     const sound = getStageSound();
     const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -98,6 +104,7 @@ export function MacStage() {
     let w = 0;
     let h = 0;
     let stripW = 0;
+    let base = 0; // her box in CSS pixels: the biggest she ever gets
 
     const measure = () => {
       /* Layout size, NOT getBoundingClientRect: the rect is the TRANSFORMED box, so
@@ -112,35 +119,14 @@ export function MacStage() {
       dropC.style.height = `${h}px`;
       pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       pctx.imageSmoothingEnabled = false;
-    };
 
-    const bigDp = () => Math.max(6, Math.round((h * 0.44) / ART_GRID));
-    const smallDp = () => Math.max(3, Math.round((h * 0.07) / ART_GRID));
-    const danceDp = () => Math.max(5, Math.round((h * 0.3) / ART_GRID));
-
-    let lastDp = -1;
-    const sizeDuck = (dp: number) => {
-      if (dp === lastDp) return;
-      lastDp = dp;
-      const side = ART_GRID * dp;
-      duck.width = Math.round(side * dpr);
-      duck.height = Math.round(side * dpr);
-      duck.style.width = `${side}px`;
-      duck.style.height = `${side}px`;
-      dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      dctx.imageSmoothingEnabled = false;
-      dctx.clearRect(0, 0, side, side);
-      for (const px of RECTS) {
-        dctx.fillStyle = px.c;
-        dctx.fillRect(px.x * dp, px.y * dp, dp, dp);
-      }
+      base = Math.max(24, Math.round(h * BIG));
+      duck.style.width = `${base}px`;
+      duck.style.height = `${base}px`;
     };
 
     measure();
-    const ro = new ResizeObserver(() => {
-      measure();
-      lastDp = -1;
-    });
+    const ro = new ResizeObserver(measure);
     ro.observe(mac);
 
     /* A droplet, rendered once, then blitted. */
@@ -215,27 +201,26 @@ export function MacStage() {
       const cornerY = h * 0.855;
       let cx = lerp(w / 2, cornerX, travel);
       let cy = lerp(h / 2, cornerY, travel);
-      let dp = Math.round(lerp(bigDp(), smallDp(), travel));
+      let side = h * lerp(BIG, SMALL, travel);
       let flip = false;
 
       if (roam > 0) {
-        // Dancing: a slow wander plus a quick bob. Translation only, so every pixel
-        // stays square -- and she turns by an exact horizontal flip, never a rotation.
+        // Dancing: a slow wander plus a quick bob, and she turns by a flip rather than
+        // a rotation -- a duck that banks like an aeroplane is a different character.
         const wx = w / 2 + Math.sin(now / 900) * w * 0.26;
         const wy = h / 2 + Math.sin(now / 620) * h * 0.2 + Math.sin(now / 210) * 6;
         cx = lerp(cornerX, wx, roam);
         cy = lerp(cornerY, wy, roam);
-        dp = Math.round(lerp(smallDp(), danceDp(), roam));
+        side = h * lerp(SMALL, DANCE, roam);
         flip = roam > 0.35 && Math.cos(now / 900) < 0;
       }
 
-      sizeDuck(dp);
-      const side = ART_GRID * dp;
       const half = side / 2;
+      const k = side / base;
       set(duck, "transform", "dkT",
         flip
-          ? `translate3d(${(cx + half).toFixed(1)}px,${(cy - half).toFixed(1)}px,0) scaleX(-1)`
-          : `translate3d(${(cx - half).toFixed(1)}px,${(cy - half).toFixed(1)}px,0)`);
+          ? `translate3d(${(cx + half).toFixed(1)}px,${(cy - half).toFixed(1)}px,0) scale(${(-k).toFixed(4)},${k.toFixed(4)})`
+          : `translate3d(${(cx - half).toFixed(1)}px,${(cy - half).toFixed(1)}px,0) scale(${k.toFixed(4)})`);
       set(duck, "opacity", "dkO", arrive.toFixed(3));
 
       /* --- act 1: water --- */
@@ -255,8 +240,8 @@ export function MacStage() {
           lastSweat = now;
           for (let i = 0; i < 2; i++) {
             sweat.push({
-              x: cx + dp * (1 + Math.random() * 3),
-              y: cy - dp * 5,
+              x: cx + side * (0.056 + Math.random() * 0.167),
+              y: cy - side * 0.278,
               vx: 26 + Math.random() * 30,
               vy: -46 - Math.random() * 26,
               life: 1,
@@ -343,12 +328,12 @@ export function MacStage() {
         }
       });
       const paint = () => {
-        const dp = smallDp();
-        sizeDuck(dp);
-        const half = (ART_GRID * dp) / 2;
+        const side = h * SMALL;
+        const half = side / 2;
         const cx = w * 0.075;
         const cy = h * 0.855;
-        duck.style.transform = `translate3d(${cx - half}px,${cy - half}px,0)`;
+        duck.style.transform =
+          `translate3d(${cx - half}px,${cy - half}px,0) scale(${(side / base).toFixed(4)})`;
         duck.style.opacity = "1";
         drops.length = 0;
         for (let i = 0; i < 12; i++) {
@@ -359,7 +344,6 @@ export function MacStage() {
       paint();
       const ro2 = new ResizeObserver(() => {
         measure();
-        lastDp = -1;
         paint();
       });
       ro2.observe(mac);
@@ -385,7 +369,6 @@ export function MacStage() {
     const onResize = () => {
       remeasureTrack();
       measure();
-      lastDp = -1;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onResize);
@@ -438,7 +421,16 @@ export function MacStage() {
             </div>
             <canvas className={s.drops} ref={dropRef} aria-hidden="true" />
             <div className={s.dark} ref={darkRef} aria-hidden="true" />
-            <canvas className={s.duck} ref={duckRef} aria-hidden="true" />
+            <div className={s.duck} ref={duckRef} aria-hidden="true">
+              <Image
+                className={s.duckArt}
+                src="/floatyDuck.png"
+                alt=""
+                width={499}
+                height={500}
+                sizes="45vh"
+              />
+            </div>
             <div className={s.badge} ref={badgeRef} aria-hidden="true">
               25:00
             </div>

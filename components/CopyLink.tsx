@@ -16,7 +16,7 @@ export function CopyLink({ className }: { className?: string }) {
       className={className}
       onPointerDown={async () => {
         try {
-          await navigator.clipboard.writeText("https://floatyduck.app");
+          await navigator.clipboard.writeText("https://floatyduck.com");
           setCopied(true);
           window.setTimeout(() => setCopied(false), 1600);
         } catch {

@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://floatyduck.app"),
+  metadataBase: new URL("https://floatyduck.com"),
   title: "Floaty Duck — someone to sit with you",
   description:
     "A little duck who lives on your Mac and remembers the water, the blinking, and the timer you set. Free, and nothing leaves your Mac.",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Floaty Duck — someone to sit with you",
     description:
       "A little duck who lives on your Mac and remembers the water, the blinking, and the timer you set.",
-    url: "https://floatyduck.app",
+    url: "https://floatyduck.com",
     siteName: "Floaty Duck",
     type: "website",
   },

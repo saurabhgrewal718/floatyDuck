@@ -258,3 +258,11 @@
     min-height: 11rem;
   }
 }
+
+/* She is laid out at BIG once per resize; every other size in the scene is a scale()
+   down from it, so growing and shrinking never touch layout. */
+.duckArt {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

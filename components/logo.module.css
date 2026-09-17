@@ -12,6 +12,12 @@
   outline-offset: 4px;
 }
 
+.mark {
+  /* The artwork is a duck on transparent ground, not a square tile: contain it so the
+     box the caller asked for is an upper bound, never a stretch. */
+  object-fit: contain;
+}
+
 .tile {
   display: grid;
   place-items: center;
