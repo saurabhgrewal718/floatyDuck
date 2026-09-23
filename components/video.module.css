@@ -5,6 +5,12 @@
   padding: var(--dp5) var(--dp5) var(--dp8);
 }
 
+@media (max-width: 560px) {
+  .section {
+    padding: var(--dp2) var(--dp3) var(--dp5);
+  }
+}
+
 .frame {
   position: relative;
   aspect-ratio: 16 / 9;

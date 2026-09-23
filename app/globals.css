@@ -70,6 +70,12 @@ canvas {
   max-width: 100%;
 }
 
+/* A path or a bundle id has no spaces to break at, and one of them is wider than a
+   phone. Let it wrap anywhere rather than push the page sideways. */
+code {
+  overflow-wrap: anywhere;
+}
+
 /* --------------------------------------------------------------- type ---- */
 
 /**
@@ -145,6 +151,9 @@ a {
 
 .floatyButton {
   display: block;
+  /* Never wider than the box she is measured against, even in the moment before
+     the measurement lands. */
+  max-width: 100%;
   margin: 0;
   padding: 0;
   border: 0;

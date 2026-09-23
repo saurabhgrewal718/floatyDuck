@@ -83,8 +83,16 @@
 }
 
 @media (max-width: 34rem) {
+  /* On a phone the aside was a third of the screen. Same words, less air. */
   .bar {
     inset: auto var(--dp) var(--dp) var(--dp);
     max-width: none;
+    gap: var(--dp);
+    padding: var(--dp2);
+  }
+
+  .text {
+    font-size: 0.8125rem;
+    line-height: 1.45;
   }
 }

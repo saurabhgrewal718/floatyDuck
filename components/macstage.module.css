@@ -254,8 +254,25 @@
 }
 
 @media (max-width: 640px) {
+  /* A thumb covers ground faster than a wheel, and 620vh of a phone is a very long
+     flick. Shorter track, same three acts. */
+  .track {
+    height: 460vh;
+  }
+
+  .stage {
+    gap: var(--dp2);
+    padding: calc(var(--header-h) + var(--dp3)) var(--dp3) var(--dp3);
+  }
+
   .captions {
     min-height: 11rem;
+  }
+
+  /* At 40% of a 340px screen the notification is 136px and wraps "Floaty Duck"
+     onto two lines. Wider box, one line. */
+  .note {
+    width: min(62%, 236px);
   }
 }
 

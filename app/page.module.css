@@ -344,7 +344,10 @@
   .hero,
   .feature,
   .proof {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr), not 1fr: a bare 1fr has a min of the content's own width, and
+       her 396px box would hold the track open past a 390px phone. This is what let
+       the whole page grow to 436px and made every phone zoom out to fit it. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--dp5);
     min-height: 0;
   }
@@ -354,9 +357,15 @@
     text-align: left;
   }
 
+  .heroText,
+  .heroDuck {
+    min-width: 0;
+  }
+
   .heroDuck {
     order: -1;
     align-items: flex-start;
+    width: 100%;
   }
 
   .featureFlip .featureText {
@@ -377,22 +386,61 @@
     gap: var(--dp5);
   }
 }
+
 @media (max-width: 560px) {
-.button,
+  /* 40px a side is a fifth of a phone; 24px leaves the words the room. */
+  .hero,
+  .proof,
+  .yours,
+  .privacy,
+  .cta,
+  .footer {
+    padding-inline: var(--dp3);
+  }
+
+  .hero {
+    gap: var(--dp3);
+    padding-top: var(--dp3);
+    padding-bottom: var(--dp8);
+  }
+
+  /* She takes a little over half the width, so the headline is on the first screen
+     with her rather than a swipe below it. Floaty measures this box to size herself. */
+  .heroDuck {
+    max-width: 60vw;
+  }
+
+  .heroText {
+    gap: var(--dp3);
+  }
+
+  .proof,
+  .yours {
+    padding-block: var(--dp8);
+  }
+
+  .privacy,
+  .cta {
+    padding-block: var(--dp12);
+  }
+
+  .button,
   .buttonQuiet,
   .requirement,
   .pokeHint {
     display: none;
   }
-.path {
-    font-size: 0.875rem;
-  }
-.onPhone {
+
+  .onPhone {
     display: flex;
   }
-.privacy,
-  .cta {
-    padding-block: var(--dp12);
+
+  .path {
+    font-size: 0.875rem;
+  }
+
+  .footerNav {
+    flex-wrap: wrap;
+    gap: var(--dp2) var(--dp3);
   }
 }
-
