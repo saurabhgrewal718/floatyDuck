@@ -1,5 +1,7 @@
 "use client";
 
+import { track } from "@/lib/analytics";
+
 /**
  * The phone CTA. A visitor on a phone cannot install a Mac app, so instead of a
  * dead button or an email form we hand them the link and collect nothing.
@@ -17,6 +19,7 @@ export function CopyLink({ className }: { className?: string }) {
       onPointerDown={async () => {
         try {
           await navigator.clipboard.writeText("https://floatyduck.app");
+      track("copy_link_clicked");
           setCopied(true);
           window.setTimeout(() => setCopied(false), 1600);
         } catch {

@@ -27,11 +27,28 @@ export const POSTHOG_HOST =
 export type DuckEvent =
   /** The download button, wherever on the page it was pressed. */
   | "download_clicked"
-  /** The poster was clicked and the Vimeo frame was built. */
+  /** A download button came properly on screen -- carries the same `where`. Without
+   *  it a visitor who did not download is ambiguous: uninterested, or never shown the
+   *  button? Those two want opposite fixes, and nothing else distinguishes them. */
+  | "cta_viewed"
+  /** A section of the page was reached -- carries `name`. `pricing` is the one that
+   *  matters most; the rest say where attention runs out. */
+  | "section_viewed"
+  /** The phone-to-Mac handoff: they cannot install here and said so. */
+  | "copy_link_clicked"
+  /** Wrote in. Weak as a number, strong as a signal -- these are the people who
+   *  cared enough to ask. */
+  | "support_email_clicked"
+  /** The trailer autoplays muted, so this is *not* a play count: it is the play
+   *  button pressed after a pause -- someone who stopped it and came back. */
   | "video_played"
+  /** The sound button pressed on the muted trailer. The strongest signal the video
+   *  sends: they were watching closely enough to want to hear it. */
+  | "video_unmuted"
   /** A quarter mark went past -- carries `percent`, one of 25, 50 or 75. */
   | "video_progress"
-  /** Ran to the end. Sent once, and never for someone who scrubbed past. */
+  /** Ran to the end. Sent once per visit -- the clip loops, so later laps are not
+   *  counted again. */
   | "video_completed";
 
 type Capture = {

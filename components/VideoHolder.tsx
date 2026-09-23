@@ -5,18 +5,17 @@
  *
  * TWO SHAPES, PICKED FROM THE URL IN `VIDEO`. A direct file (.mp4 in /public, Blob,
  * R2) plays in a bare <video>: muted, looping, started only once it is actually on
- * screen, no player chrome at all. That is the nicer of the two and what this page
- * was drawn for.
+ * screen, no player chrome at all.
  *
  * A Vimeo link cannot go in a <video> tag -- it is a web page wrapping a player, not
- * a file -- so it plays in Vimeo's iframe instead. To keep that player's chrome off
- * the page until someone actually wants it, the frame rests as the poster with a
- * button over it, and the iframe is only built on the click. Nothing of Vimeo's
- * loads before then: no iframe, no script, no cookie, no third party on first paint.
- * The click doubles as the user gesture the player needs to start with its sound on,
- * which is the point of a trailer -- and it means nothing moves or speaks on this
- * page until it is asked to, so there is no autoplay to take away from someone who
- * asked for less motion.
+ * a file -- so it plays in Vimeo's iframe instead, in the player's *background* mode:
+ * it starts by itself, muted, loops, and draws none of Vimeo's own furniture. The
+ * only controls on it are ours, two of them, play/pause and sound, talking to the
+ * frame over the Vimeo SDK. The poster sits underneath until the first frame lands
+ * so the box is never blank.
+ *
+ * Someone who asked for less motion still gets the frame, but it starts paused: the
+ * play button is right there, and watching becomes something they choose.
  */
 
 import Image from "next/image";
@@ -70,7 +69,16 @@ function read(url: string): Source {
  *  nothing to an embed; the ones that matter are the ones turning its furniture off. */
 function embedSrc(id: string, hash?: string): string {
   const params = new URLSearchParams({
-    autoplay: "1",     // allowed: the iframe only exists because someone clicked
+    /* Background mode: autoplay + muted + loop, and none of the player's chrome --
+       no bar, no title, no logo, no keyboard shortcuts. Ours go on top instead. */
+    background: "1",
+    autoplay: "1",
+    muted: "1",
+    loop: "1",
+    autopause: "0",    // background mode already implies it; said out loud anyway
+    /* Ask for 720p up front rather than letting the player open on the lowest rung
+       and climb. Confirmed and raised on `ready`, below. */
+    quality: "720p",
     title: "0",
     byline: "0",
     portrait: "0",
@@ -82,33 +90,132 @@ function embedSrc(id: string, hash?: string): string {
   return `https://player.vimeo.com/video/${id}?${params}`;
 }
 
+/* ------------------------------------------------------------- controls ---- */
+
+/** The only two controls either player gets: play/pause and sound. Same buttons,
+ *  same corner, whichever way the clip is hosted. */
+function Controls({
+  paused,
+  muted,
+  onPlay,
+  onMute,
+}: {
+  paused: boolean;
+  muted: boolean;
+  onPlay: () => void;
+  onMute: () => void;
+}) {
+  return (
+    <div className={s.controls}>
+      <button
+        type="button"
+        className={s.control}
+        onClick={onPlay}
+        aria-label={paused ? "Play" : "Pause"}
+        aria-pressed={!paused}
+        title={paused ? "Play" : "Pause"}
+      >
+        {paused ? (
+          <svg viewBox="0 0 12 14" width="11" height="13" aria-hidden="true">
+            <path d="M0 0.8v12.4a.8.8 0 0 0 1.22.68l10-6.2a.8.8 0 0 0 0-1.36l-10-6.2A.8.8 0 0 0 0 .8Z" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 12 14" width="11" height="13" aria-hidden="true">
+            <rect x="1" y="0.5" width="3.4" height="13" rx="0.9" />
+            <rect x="7.6" y="0.5" width="3.4" height="13" rx="0.9" />
+          </svg>
+        )}
+      </button>
+      <button
+        type="button"
+        className={s.control}
+        onClick={onMute}
+        aria-label={muted ? "Unmute" : "Mute"}
+        aria-pressed={!muted}
+        title={muted ? "Unmute" : "Mute"}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M11 5.5 6.8 9H4.2a.7.7 0 0 0-.7.7v4.6c0 .4.3.7.7.7h2.6l4.2 3.5a.5.5 0 0 0 .8-.4V5.9a.5.5 0 0 0-.8-.4Z"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinejoin="round"
+          />
+          {muted ? (
+            <path d="M15.5 9.5l5 5m0-5-5 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          ) : (
+            <>
+              <path d="M15.4 9.2a4 4 0 0 1 0 5.6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <path d="M17.9 6.9a7.4 7.4 0 0 1 0 10.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </>
+          )}
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+/** Quarter marks, each counted once and only forward; the end caught as the clock
+ *  wrapping back to the start, since a looping player never says "ended". */
+function progressMeter() {
+  const passed = new Set<number>();
+  let last = 0;
+  return (percent: number) => {
+    const now = percent * 100;
+    for (const mark of [25, 50, 75]) {
+      if (now >= mark && !passed.has(mark)) {
+        passed.add(mark);
+        track("video_progress", { percent: mark });
+      }
+    }
+    if (last > 90 && now < 10 && !passed.has(100)) {
+      passed.add(100);
+      track("video_completed");
+    }
+    last = now;
+  };
+}
+
 /* ------------------------------------------------------------- the file ---- */
 
 function FilePlayer({ src, poster }: { src: string; poster?: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  /* A pause has to survive scrolling away and back, or the observer would undo it. */
+  const userPaused = useRef(false);
+  /* True until the element actually says `play`: nothing is claimed that has not
+     happened. */
+  const [paused, setPaused] = useState(true);
+  const [muted, setMuted] = useState(true);
 
   useEffect(() => {
     const host = hostRef.current;
     const video = videoRef.current;
     if (!host || !video) return;
 
-    /* Someone who asked for less motion did not ask for a clip that starts itself and
-       never stops. They get the poster, the real controls, and no loop -- watching it
-       becomes something they choose rather than something that happens at them. */
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      video.controls = true;
-      video.loop = false;
-      return;
-    }
+    /* The buttons follow the element, so whatever the browser does on its own -- a
+       tab put to sleep, a phone pausing everything for a call -- is what they say. */
+    const onPlay = () => setPaused(false);
+    const onPause = () => setPaused(true);
+    const onVolume = () => setMuted(video.muted || video.volume === 0);
+    const meter = progressMeter();
+    const onTime = () => {
+      if (video.duration) meter(video.currentTime / video.duration);
+    };
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("volumechange", onVolume);
+    video.addEventListener("timeupdate", onTime);
 
-    // A pause has to survive scrolling away and back, or the observer would undo it.
-    let pausedByUser = false;
+    /* Someone who asked for less motion did not ask for a clip that starts itself.
+       The frame and its two buttons stay; the first press is theirs to make. */
+    userPaused.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    /* Starts itself once it is actually on screen, and rests when it is not. */
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          if (!pausedByUser) void video.play().catch(() => {});
+          if (!userPaused.current) void video.play().catch(() => {});
         } else {
           video.pause();
         }
@@ -117,18 +224,35 @@ function FilePlayer({ src, poster }: { src: string; poster?: string }) {
     );
     io.observe(host);
 
-    const toggle = () => {
-      pausedByUser = !video.paused;
-      if (video.paused) void video.play().catch(() => {});
-      else video.pause();
-    };
-    video.addEventListener("click", toggle);
-
     return () => {
       io.disconnect();
-      video.removeEventListener("click", toggle);
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("volumechange", onVolume);
+      video.removeEventListener("timeupdate", onTime);
     };
   }, [src]);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      track("video_played");
+      userPaused.current = false;
+      void video.play().catch(() => {});
+    } else {
+      userPaused.current = true;
+      video.pause();
+    }
+  };
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.muted) track("video_unmuted");
+    video.muted = !video.muted;
+    if (!video.muted && video.volume === 0) video.volume = 1;
+  };
 
   return (
     <div className={s.frame} ref={hostRef}>
@@ -140,29 +264,34 @@ function FilePlayer({ src, poster }: { src: string; poster?: string }) {
         muted
         loop
         playsInline
-        preload="metadata"
-        aria-label="Floaty Duck, in about a minute. Click to pause."
+        preload="auto"
+        aria-label="Floaty Duck, in about a minute."
       />
+      <Controls paused={paused} muted={muted} onPlay={togglePlay} onMute={toggleMute} />
     </div>
   );
 }
 
 /* ------------------------------------------------------------ the embed ---- */
 
-function VimeoPlayer({ id, hash, poster }: { id: string; hash?: string; poster?: string }) {
-  const [playing, setPlaying] = useState(false);
-  const frameRef = useRef<HTMLIFrameElement>(null);
+/** Least-good first. Whatever the player has that sits at 720p or above wins, the
+ *  highest of them; below that it is left on auto rather than pinned to something
+ *  worse than auto would pick. */
+const WANTED = ["4K", "2K", "1080p", "720p"] as const;
 
-  /* HOW FAR PEOPLE ACTUALLY GET.
-     The frame is another origin and volunteers nothing, so without the player's SDK
-     talking to it over postMessage the click on the poster is the last thing this
-     page ever learns about the video -- plays would be the only number, and plays
-     say nothing about whether the thing is worth watching. The import sits inside
-     the effect so its weight is only paid by the people who asked to watch; nobody
-     else fetches a byte of it. */
+function VimeoPlayer({ id, hash, poster }: { id: string; hash?: string; poster?: string }) {
+  const frameRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<PlayerType | null>(null);
+  /* True until the player actually says `play`: nothing is claimed that has not
+     happened, and the label is right even if the frame never loads. */
+  const [paused, setPaused] = useState(true);
+  const [muted, setMuted] = useState(true);
+  /* The first frame has not landed yet; the poster covers the box until it does. */
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
     const frame = frameRef.current;
-    if (!playing || !frame) return;
+    if (!frame) return;
 
     let player: PlayerType | undefined;
     let cancelled = false;
@@ -171,73 +300,110 @@ function VimeoPlayer({ id, hash, poster }: { id: string; hash?: string; poster?:
       const { default: Player } = await import("@vimeo/player");
       if (cancelled) return;
       player = new Player(frame);
+      playerRef.current = player;
 
-      /* Each mark counted once, and only forward. `timeupdate` runs several times a
-         second, so without the set a single viewer sends 25% a hundred times over;
-         and someone who drags the scrubber back would re-cross it and be counted as
-         a second person who was never there. */
-      const passed = new Set<number>();
-      player.on("timeupdate", ({ percent }: { percent: number }) => {
-        for (const mark of [25, 50, 75]) {
-          if (percent * 100 >= mark && !passed.has(mark)) {
-            passed.add(mark);
-            track("video_progress", { percent: mark });
-          }
-        }
+      /* QUALITY. `quality=720p` in the URL is only a request; the account tier and the
+         file decide. Ask what is actually on offer and pin the best of the wanted
+         rungs. Missing SDK methods on a smaller plan reject -- that is fine, the URL
+         param has already done what it can. */
+      void player
+        .getQualities()
+        .then((list) => {
+          const have = new Set(list.map((q) => q.id));
+          const pick = WANTED.find((q) => have.has(q));
+          if (pick) return player?.setQuality(pick);
+        })
+        .catch(() => {});
+
+      /* Less motion asked for: the frame stays, autoplay does not. */
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        void player.pause().catch(() => {});
+      }
+
+      /* The buttons follow the player, not the other way round, so a state the frame
+         reaches on its own -- a tab put to sleep, a phone pausing everything for a
+         call -- is still what the label says. */
+      player.on("play", () => {
+        setPaused(false);
+        setReady(true);
       });
-      player.on("ended", () => track("video_completed"));
+      player.on("pause", () => setPaused(true));
+      player.on("volumechange", ({ volume }: { volume: number }) => setMuted(volume === 0));
+      player.on("loaded", () => {
+        void player?.getMuted().then(setMuted).catch(() => {});
+      });
+
+      /* HOW FAR PEOPLE ACTUALLY GET. Vimeo reports progress as a fraction already. */
+      const meter = progressMeter();
+      let sawEnd = false;
+      player.on("timeupdate", ({ percent }: { percent: number }) => meter(percent));
+      player.on("ended", () => {
+        /* Only reached with the loop off; the meter handles the looping case. */
+        if (sawEnd) return;
+        sawEnd = true;
+        track("video_completed");
+      });
     })();
 
     return () => {
       cancelled = true;
+      playerRef.current = null;
       /* Listeners only. `destroy()` would take the iframe with it, and that element
          belongs to React. */
-      player?.off("timeupdate");
-      player?.off("ended");
+      for (const name of ["play", "pause", "volumechange", "loaded", "timeupdate", "ended"] as const) {
+        player?.off(name);
+      }
     };
-  }, [playing]);
+  }, [id, hash]);
+
+  const togglePlay = () => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (paused) {
+      track("video_played");
+      void player.play().catch(() => {});
+    } else {
+      void player.pause().catch(() => {});
+    }
+  };
+
+  const toggleMute = () => {
+    const player = playerRef.current;
+    if (!player) return;
+    if (muted) track("video_unmuted");
+    /* The frame started life muted at volume 0; unmuting alone leaves it at 0 on
+       some builds of the player, so the volume is set with it. */
+    void player.setMuted(!muted).catch(() => {});
+    if (muted) void player.setVolume(1).catch(() => {});
+    setMuted(!muted);
+  };
 
   return (
     <div className={s.frame}>
-      {playing ? (
-        <iframe
-          ref={frameRef}
-          className={s.iframe}
-          src={embedSrc(id, hash)}
-          title="Floaty Duck"
-          /* autoplay has to be handed down explicitly: this frame is another origin,
-             and without the grant the player comes up silent or stopped. */
-          allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media"
-          referrerPolicy="strict-origin-when-cross-origin"
+      {poster && (
+        /* Her own art, not a frame of the film: a square sprite on a transparent
+           ground, sat whole on the paper. It is under the frame and fades once the
+           player has a picture of its own. */
+        <Image
+          className={`${s.poster} ${ready ? s.posterGone : ""}`}
+          src={poster}
+          alt=""
+          width={499}
+          height={500}
+          priority
         />
-      ) : (
-        <button
-          type="button"
-          className={s.facade}
-          onClick={() => {
-            track("video_played");
-            setPlaying(true);
-          }}
-        >
-          {poster ? (
-            /* Her own art, not a frame of the film: it is a square sprite with a
-               transparent ground, so it is sat whole on the paper rather than cropped
-               to a strip across her middle the way `cover` would. Her intrinsic size,
-               not the frame's -- the CSS does the fitting. */
-            <Image className={s.poster} src={poster} alt="" width={499} height={500} />
-          ) : (
-            <span className={s.badge}>
-              <DuckMark size={22} />
-            </span>
-          )}
-          <span className={s.play}>
-            <svg viewBox="0 0 12 14" width="11" height="13" aria-hidden="true">
-              <path d="M0 0.8v12.4a.8.8 0 0 0 1.22.68l10-6.2a.8.8 0 0 0 0-1.36l-10-6.2A.8.8 0 0 0 0 .8Z" />
-            </svg>
-            Watch the trailer
-          </span>
-        </button>
       )}
+      <iframe
+        ref={frameRef}
+        className={`${s.iframe} ${ready ? s.iframeIn : ""}`}
+        src={embedSrc(id, hash)}
+        title="Floaty Duck"
+        /* autoplay has to be handed down explicitly: this frame is another origin,
+           and without the grant the player comes up stopped. */
+        allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+        referrerPolicy="strict-origin-when-cross-origin"
+      />
+      <Controls paused={paused} muted={muted} onPlay={togglePlay} onMute={toggleMute} />
     </div>
   );
 }

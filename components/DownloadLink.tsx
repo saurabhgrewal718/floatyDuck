@@ -18,6 +18,7 @@
  * to win: a lost event is invisible, a delayed download is not.
  */
 
+import { useEffect, useRef } from "react";
 import { track } from "@/lib/analytics";
 
 export function DownloadLink({
@@ -31,8 +32,28 @@ export function DownloadLink({
   where: "hero" | "closing";
   children: React.ReactNode;
 }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  /* Seen, not merely rendered. Half the button inside the viewport is the threshold:
+     a sliver at the edge during a fast scroll is not an offer anybody was made. */
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        track("cta_viewed", { where });
+        observer.disconnect();
+      },
+      { threshold: 0.5 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [where]);
+
   return (
     <a
+      ref={ref}
       className={className}
       href={href}
       onClick={() => track("download_clicked", { where })}

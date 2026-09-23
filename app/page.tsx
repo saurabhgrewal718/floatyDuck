@@ -4,8 +4,10 @@ import { VideoHolder } from "@/components/VideoHolder";
 import Link from "next/link";
 import { Floaty } from "@/components/Floaty";
 import { Reveal } from "@/components/Reveal";
+import { SectionTracker } from "@/components/SectionTracker";
+import { MailLink } from "@/components/MailLink";
 import { DownloadLink } from "@/components/DownloadLink";
-import { DOWNLOAD, SUPPORT_EMAIL } from "@/lib/links";
+import { DOWNLOAD } from "@/lib/links";
 import s from "./page.module.css";
 
 function Download({ quiet = false }: { quiet?: boolean }) {
@@ -34,7 +36,7 @@ export default function Home() {
     <>
       <main>
         {/* ------------------------------------------------------- hero ---- */}
-        <section className={s.hero}>
+        <section className={s.hero} data-section="hero">
           <div className={s.heroText}>
             <Reveal as="h1" className="display">
               <span className="line">Someone to sit</span>
@@ -62,7 +64,7 @@ export default function Home() {
         <MacStage />
 
         {/* --------------------------------------------------- her, real ---- */}
-        <section className={s.proof}>
+        <section className={s.proof} data-section="features">
           <div className={s.proofText}>
             <Reveal as="h2" className="headline">
               <span className="line">And the rest of it,</span>
@@ -80,7 +82,7 @@ export default function Home() {
         </section>
 
         {/* ------------------------------------------------------- yours ---- */}
-        <section className={s.yours}>
+        <section className={s.yours} data-section="pricing">
           <Reveal as="h2" className="headline">
             <span className="line">Make her yours.</span>
           </Reveal>
@@ -110,7 +112,7 @@ export default function Home() {
         </section>
 
         {/* ----------------------------------------------------- privacy ---- */}
-        <section className={s.privacy}>
+        <section className={s.privacy} data-section="privacy">
           <Reveal as="h2" className="display">
             <span className="line">Nothing leaves</span>
             <span className="line">your Mac.</span>
@@ -146,13 +148,14 @@ export default function Home() {
         </section>
 
         {/* --------------------------------------------------------- cta ---- */}
-        <section className={s.cta}>
+        <section className={s.cta} data-section="closing">
           <Reveal as="h2" className="headline">
             <span className="line">She&rsquo;s waiting.</span>
           </Reveal>
           <Download quiet />
         </section>
       </main>
+      <SectionTracker />
 
       <footer className={s.footer}>
         <div className={s.ticks} aria-hidden="true">
@@ -165,7 +168,7 @@ export default function Home() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/refunds">Refunds</Link>
-          <a href={`mailto:${SUPPORT_EMAIL}`}>Support</a>
+          <MailLink where="footer">Support</MailLink>
         </nav>
       </footer>
     </>
