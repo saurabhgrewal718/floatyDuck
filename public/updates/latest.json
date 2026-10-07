@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "notes": "",
+  "pub_date": "2026-10-07T13:32:10Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVis4NDVjUmJoMlpaRXBHRUpBVTdJRmxmTHJmTVh3bEd2MmFNQWVOU0M5bDJpZDh2RjhKQTNXUlhWYTNMbENrSE5LY0tmSGh1OVl5aXlRamJNSmpCNDZMcFlNVHp2YlFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxMzc5ODk4CWZpbGU6RmxvYXR5IER1Y2suYXBwLnRhci5nego2SHdyZVliUWdRMDBPVktZWFIzTmcxK1AveVBpeWd1QTVISlZoRzFxT0JGSHdvUHROVmJYRGs4UWEraU9DcGNpWVBTNkJqdWlIWitjNEpKU1g2K2xBUT09Cg==",
+      "url": "https://floatyduck.app/updates/FloatyDuck_0.2.0.app.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVis4NDVjUmJoMlpaRXBHRUpBVTdJRmxmTHJmTVh3bEd2MmFNQWVOU0M5bDJpZDh2RjhKQTNXUlhWYTNMbENrSE5LY0tmSGh1OVl5aXlRamJNSmpCNDZMcFlNVHp2YlFvPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkxMzc5ODk4CWZpbGU6RmxvYXR5IER1Y2suYXBwLnRhci5nego2SHdyZVliUWdRMDBPVktZWFIzTmcxK1AveVBpeWd1QTVISlZoRzFxT0JGSHdvUHROVmJYRGs4UWEraU9DcGNpWVBTNkJqdWlIWitjNEpKU1g2K2xBUT09Cg==",
+      "url": "https://floatyduck.app/updates/FloatyDuck_0.2.0.app.tar.gz"
+    }
+  }
+}
